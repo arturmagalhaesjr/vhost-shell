@@ -1,0 +1,60 @@
+#!/bin/bash
+
+vhosts_dir="/var/www/vhosts/"
+
+domain="$1"
+user="$2"
+
+vhosts_target="http://tpanel.tritoq.com/tpanel/vhost/download/$domain"
+nginx_target="http://tpanel.tritoq.com/tpanel/vhost/download/$domain/nginx"
+
+if [ ! -d "$vhosts_dir" ]; then
+	echo "$vhosts_dir"
+	mkdir "$vhosts_dir"
+fi
+
+if [ ! $1 ]; then
+	echo "É necessário passar o domínio";
+	exit;
+fi
+
+if [ ! $1 ]; then
+    echo "É necessário passar o usuário";
+    exit;
+fi
+
+echo "### Criando diretórios"
+
+
+if [ ! -d "$vhosts_dir$domain" ]; then 
+	mkdir "$vhosts_dir$domain"
+fi
+
+mkdir "$vhosts_dir$domain/conf"
+mkdir "$vhosts_dir$domain/logs"
+mkdir "$vhosts_dir$domain/public"
+
+echo "### Baixando os vhosts"
+
+
+wget "$vhosts_target" -O "$vhosts_dir$domain/conf/vhost.conf"
+wget "$nginx_target" -O "$vhosts_dir$domain/conf/nginx.conf"
+
+ln -s "$vhosts_dir$domain/conf/vhost.conf" "/etc/apache2/sites-available/$domain"".conf"
+ln -s "$vhosts_dir$domain/conf/nginx.conf" "/etc/nginx/sites-available/$domain"".conf"
+ln -s "/etc/nginx/sites-available/$domain"".conf" "/etc/nginx/sites-enabled/$domain"".conf"
+
+useradd -s /bin/false -d "$vhosts_dir$domain" -g web "$user"
+  
+if [ ! "$(cat /etc/passwd| grep -i $1| wc -l)" = "1" ]; then
+    echo "Usuário inexistente";        
+    exit
+fi
+             
+chown -R "$user:web" "$vhosts_dir"
+
+a2ensite "$domain"".conf"
+service apache2 reload
+service nginx restart
+
+
