@@ -44,7 +44,8 @@ ln -s "$vhosts_dir$domain/conf/vhost.conf" "/etc/apache2/sites-available/$domain
 ln -s "$vhosts_dir$domain/conf/nginx.conf" "/etc/nginx/sites-available/$domain"".conf"
 ln -s "/etc/nginx/sites-available/$domain"".conf" "/etc/nginx/sites-enabled/$domain"".conf"
 
-useradd -s /bin/false -d "$vhosts_dir$domain" -g web "$user"
+groupadd "$user"
+useradd -s /bin/false -d "$vhosts_dir$domain" -g "$user" "$user"
   
 if [ ! "$(cat /etc/passwd| grep -i $1| wc -l)" = "1" ]; then
     echo "Usuário inexistente";        
