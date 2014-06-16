@@ -52,7 +52,7 @@ if [ ! "$(cat /etc/passwd| grep -i $1| wc -l)" = "1" ]; then
     exit
 fi
              
-chown -R "$user:web" "$vhosts_dir$domain"
+chown -R "$user"":""$user" "$vhosts_dir$domain"
 
 a2ensite "$domain"".conf"
 service apache2 reload
